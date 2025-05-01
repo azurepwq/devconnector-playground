@@ -1,6 +1,7 @@
-const express = require("express");
-const mongoose = require("mongoose");
+import express, { Request, Response } from "express";
+import mongoose from "mongoose";
 
+import { profile, posts, users } from './routes/api';
 
 const app = express();
 
@@ -8,21 +9,18 @@ const app = express();
 const db = require('./config/keys').mongoURI;
 
 // Connect to MongoDB
-mongoose.
-  connect(db).
-  then(() => console.log('MongoDB Connected')).
-  catch(err => console.log(err));
+mongoose.connect(db)
+  .then(() => console.log('MongoDB Connected'))
+  .catch((err: Error) => console.log(err));
 
-app.get('/', (req, res) => {
+app.get('/', (req: Request, res: Response) => {
   return res.send("Hello, azurepwq!");
 });
 
 // Use Routes
-const { profile, posts, users } = require('./routes/api');
 app.use('/api/users', users);
 app.use('/api/profile', profile);
 app.use('/api/posts', posts);
-
 
 const port = process.env.PORT || 3000;
 
