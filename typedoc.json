@@ -1,0 +1,6 @@
+{
+  "entryPoints": ["src/server.ts"], // Adjust to your main entry file(s)
+  "out": "docs/typedoc",
+  "tsconfig": "tsconfig.json",
+  "includeVersion": true
+}

@@ -2,6 +2,8 @@ import express, { Request, Response } from 'express';
 import gravatar from 'gravatar';
 import bcrypt from 'bcryptjs';
 import Users from '../../models/Users';
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from '../../swagger';
 
 const router = express.Router();
 // Load User Model
@@ -17,9 +19,32 @@ router.get('/test', (req: Request, res: Response) => res.json({
 }));
 
 /**
- * @route   POST api/users/register
- * @desc    Register user
- * @access  Public
+ * @openapi
+ * /api/users/register:
+ *   post:
+ *     summary: Register a new user
+ *     tags:
+ *       - Users
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: User created successfully
+ *       400:
+ *         description: Email already exists
+ *       500:
+ *         description: Server error
  */
 router.post('/register', async (req, res) => {
   try {
@@ -41,8 +66,9 @@ router.post('/register', async (req, res) => {
     });
 
     bcrypt.genSalt(10, (err, salt) => {
-      bcrypt.hash(newUser.password, salt, async (err, hash: string) => {
-        if (err) throw err;
+      if (err) throw err;
+      bcrypt.hash((newUser.password ?? ''), salt as string | number, async (err, hash) => {
+        if (err || !hash) throw err || new Error('Hashing failed');
         newUser.password = hash;
         try {
           await newUser.save();
@@ -53,13 +79,21 @@ router.post('/register', async (req, res) => {
         }
       });
     });
-
-    await newUser.save();
-    res.status(201).json(newUser);
   } catch (err: any) {
     console.error(err.message);
     res.status(500).send('Server Error');
   }
 })
+
+const app = express();
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+// ... your other routes and middleware
+
+app.listen(3000, () => {
+  console.log('Server running on http://localhost:3000');
+  console.log('Swagger docs at http://localhost:3000/api-docs');
+});
 
 export default router;
