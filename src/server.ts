@@ -2,8 +2,12 @@ import express, { Request, Response } from "express";
 import mongoose from "mongoose";
 
 import { profile, posts, users } from './routes/api';
+import bodyParser from "body-parser";
 
 const app = express();
+// Body parser middleware
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
 // MongoDB config
 const db = require('./config/keys').mongoURI;
